@@ -1,18 +1,24 @@
 const User = require('../models/user.model.js');
 const passwordHash = require("password-hash");
+const jwt = require('jwt-simple');
+const config = require('../../config');
+
+function tokenForUser(user) {
+    const timestamp = new Date().getTime();
+    return jwt.encode({ sub: user.id, iat: timestamp}, config.secret);
+}
 
 exports.signup = function(req, res) {
     //console.log(req.body);
-    if (!req.body.role ||
-        !req.body.matricule ||
-        !req.body.email ||
+    if (!req.body.email ||
         !req.body.password ||
-        !req.body.nom ||
-        !req.body.prenom) {
+        !req.body.lastName ||
+        !req.body.firstName) {
         //Le cas où l'email ou bien le password ne serait pas soumit ou nul
         res.status(400).json({
             "text": "Requête invalide"
         })
+
     } else {
 
         let user = {
@@ -62,7 +68,8 @@ exports.signup = function(req, res) {
                 case 500:
                     console.log('fail find one');
                     res.status(500).json({
-                        "text": "Erreur interne switch"
+                        "text": "Erreur interne switch",
+                        "error" : error
                     });
                     break;
                 case 204:

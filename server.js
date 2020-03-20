@@ -1,14 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const router = require('./router');
+const conf = require("./config");
 
 // create express app
 const app = express();
 
 // parse requests of content-type - application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // parse requests of content-type - application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 // Configuring the database
 const dbConfig = require('./config/database.config.js');
@@ -17,7 +19,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 // Connecting to the database
-mongoose.connect(dbConfig.url, {
+mongoose.connect('mongodb://'+conf.dbUser+":"+conf.password+"@"+conf.dbpath,{
     useNewUrlParser: true
 }).then(() => {
     console.log("Successfully connected to the database");    
@@ -26,19 +28,8 @@ mongoose.connect(dbConfig.url, {
     process.exit();
 });
 
-// define a simple route
-app.get('/', (req, res) => {
-    res.json({"message": "Bienvenue sur l'API Covid Anim. Amuses-toi, et bon confinement"});
-});
 
-// Require Users routes
-require('./app/routes/user.routes.js')(app);
-
-// Require category routes
-require('./app/routes/category.routes.js')(app);
-
-// Require activity routes
-require('./app/routes/activity.routes.js')(app);
+router(app);
 
 // listen for requests
 app.listen(8080, () => {
